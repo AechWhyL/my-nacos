@@ -8,10 +8,13 @@ services:
       - nacos-standalone-logs:/home/nacos/logs
     ports:
       - "8080:8080"
-      - "8848:8848"
+      - "127.0.0.1:8848:8848"
       - "9848:9848"
     networks:
-      - nacos-compose_network
+      - nacos-network
+    depends_on:
+      mysql:
+        condition: service_healthy
 
   mysql:
     image: mysql:8.0.30
@@ -19,14 +22,21 @@ services:
       - ./env/mysql.env
     container_name: mysql-nacos
     networks:
-      - nacos-compose_network
+      - nacos-network
     ports:
-      - "3366:3306"
+      - "127.0.0.1:3366:3306"
     volumes:
-      - ./mysql-nacos:/var/lib/mysql
+      - mysql-nacos:/var/lib/mysql
+      - ./mysql-init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -uroot -p$${MYSQL_ROOT_PASSWORD}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
 
 networks:
-  nacos-compose_network:
+  nacos-network:
     driver: bridge
 
 volumes:
