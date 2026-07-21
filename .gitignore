@@ -1,0 +1,11 @@
+.env
+env/*.env
+# Keep examples tracked
+!.env.example
+!env/*.env.example
+
+# Local MySQL data if using bind mount
+mysql-nacos/
+
+# Logs / temp
+*.log
